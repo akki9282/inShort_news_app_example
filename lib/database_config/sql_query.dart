@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:inshorts_news_app/database_config/table.dart';
 
 import 'database.dart';
@@ -13,9 +15,14 @@ class SQLQuery {
       {required String title,
       required String id,
       required String content,
-      required image_url}) async {
+      required String imageUrl,
+      required Uint8List image}) async {
     await database.into(database.news).insert(NewsCompanion.insert(
-        title: title, content: content, image_url: image_url, id: id));
+        title: title,
+        content: content,
+        image_url: imageUrl,
+        id: id,
+        image: image));
   }
 
   deleteNews(String id) async {

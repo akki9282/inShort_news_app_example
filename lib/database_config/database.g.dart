@@ -30,8 +30,13 @@ class $NewsTable extends News with TableInfo<$NewsTable, New> {
   late final GeneratedColumn<String> image_url = GeneratedColumn<String>(
       'image_url', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _imageMeta = const VerificationMeta('image');
   @override
-  List<GeneratedColumn> get $columns => [id, title, content, image_url];
+  late final GeneratedColumn<Uint8List> image = GeneratedColumn<Uint8List>(
+      'image', aliasedName, false,
+      type: DriftSqlType.blob, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, title, content, image_url, image];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -65,6 +70,12 @@ class $NewsTable extends News with TableInfo<$NewsTable, New> {
     } else if (isInserting) {
       context.missing(_image_urlMeta);
     }
+    if (data.containsKey('image')) {
+      context.handle(
+          _imageMeta, image.isAcceptableOrUnknown(data['image']!, _imageMeta));
+    } else if (isInserting) {
+      context.missing(_imageMeta);
+    }
     return context;
   }
 
@@ -82,6 +93,8 @@ class $NewsTable extends News with TableInfo<$NewsTable, New> {
           .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
       image_url: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}image_url'])!,
+      image: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}image'])!,
     );
   }
 
@@ -96,11 +109,13 @@ class New extends DataClass implements Insertable<New> {
   final String title;
   final String content;
   final String image_url;
+  final Uint8List image;
   const New(
       {required this.id,
       required this.title,
       required this.content,
-      required this.image_url});
+      required this.image_url,
+      required this.image});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -108,6 +123,7 @@ class New extends DataClass implements Insertable<New> {
     map['title'] = Variable<String>(title);
     map['content'] = Variable<String>(content);
     map['image_url'] = Variable<String>(image_url);
+    map['image'] = Variable<Uint8List>(image);
     return map;
   }
 
@@ -117,6 +133,7 @@ class New extends DataClass implements Insertable<New> {
       title: Value(title),
       content: Value(content),
       image_url: Value(image_url),
+      image: Value(image),
     );
   }
 
@@ -128,6 +145,7 @@ class New extends DataClass implements Insertable<New> {
       title: serializer.fromJson<String>(json['title']),
       content: serializer.fromJson<String>(json['content']),
       image_url: serializer.fromJson<String>(json['image_url']),
+      image: serializer.fromJson<Uint8List>(json['image']),
     );
   }
   @override
@@ -138,16 +156,22 @@ class New extends DataClass implements Insertable<New> {
       'title': serializer.toJson<String>(title),
       'content': serializer.toJson<String>(content),
       'image_url': serializer.toJson<String>(image_url),
+      'image': serializer.toJson<Uint8List>(image),
     };
   }
 
   New copyWith(
-          {String? id, String? title, String? content, String? image_url}) =>
+          {String? id,
+          String? title,
+          String? content,
+          String? image_url,
+          Uint8List? image}) =>
       New(
         id: id ?? this.id,
         title: title ?? this.title,
         content: content ?? this.content,
         image_url: image_url ?? this.image_url,
+        image: image ?? this.image,
       );
   @override
   String toString() {
@@ -155,13 +179,15 @@ class New extends DataClass implements Insertable<New> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('content: $content, ')
-          ..write('image_url: $image_url')
+          ..write('image_url: $image_url, ')
+          ..write('image: $image')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, title, content, image_url);
+  int get hashCode => Object.hash(
+      id, title, content, image_url, $driftBlobEquality.hash(image));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -169,7 +195,8 @@ class New extends DataClass implements Insertable<New> {
           other.id == this.id &&
           other.title == this.title &&
           other.content == this.content &&
-          other.image_url == this.image_url);
+          other.image_url == this.image_url &&
+          $driftBlobEquality.equals(other.image, this.image));
 }
 
 class NewsCompanion extends UpdateCompanion<New> {
@@ -177,12 +204,14 @@ class NewsCompanion extends UpdateCompanion<New> {
   final Value<String> title;
   final Value<String> content;
   final Value<String> image_url;
+  final Value<Uint8List> image;
   final Value<int> rowid;
   const NewsCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.content = const Value.absent(),
     this.image_url = const Value.absent(),
+    this.image = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   NewsCompanion.insert({
@@ -190,16 +219,19 @@ class NewsCompanion extends UpdateCompanion<New> {
     required String title,
     required String content,
     required String image_url,
+    required Uint8List image,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         title = Value(title),
         content = Value(content),
-        image_url = Value(image_url);
+        image_url = Value(image_url),
+        image = Value(image);
   static Insertable<New> custom({
     Expression<String>? id,
     Expression<String>? title,
     Expression<String>? content,
     Expression<String>? image_url,
+    Expression<Uint8List>? image,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -207,6 +239,7 @@ class NewsCompanion extends UpdateCompanion<New> {
       if (title != null) 'title': title,
       if (content != null) 'content': content,
       if (image_url != null) 'image_url': image_url,
+      if (image != null) 'image': image,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -216,12 +249,14 @@ class NewsCompanion extends UpdateCompanion<New> {
       Value<String>? title,
       Value<String>? content,
       Value<String>? image_url,
+      Value<Uint8List>? image,
       Value<int>? rowid}) {
     return NewsCompanion(
       id: id ?? this.id,
       title: title ?? this.title,
       content: content ?? this.content,
       image_url: image_url ?? this.image_url,
+      image: image ?? this.image,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -241,6 +276,9 @@ class NewsCompanion extends UpdateCompanion<New> {
     if (image_url.present) {
       map['image_url'] = Variable<String>(image_url.value);
     }
+    if (image.present) {
+      map['image'] = Variable<Uint8List>(image.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -254,6 +292,7 @@ class NewsCompanion extends UpdateCompanion<New> {
           ..write('title: $title, ')
           ..write('content: $content, ')
           ..write('image_url: $image_url, ')
+          ..write('image: $image, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();

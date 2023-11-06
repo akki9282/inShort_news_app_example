@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:get/get.dart';
@@ -36,9 +39,30 @@ class NewsController extends GetxController {
       {required String title,
       required String id,
       required String content,
-      required image_url}) async {
-    await SQLQuery()
-        .addNews(title: title, content: content, image_url: image_url, id: id);
+      required imageUrl}) async {
+    // var response = await dio.request(
+    //   'https://static.inshorts.com/inshorts/images/v1/variants/jpg/m/2023/11_nov/6_mon/img_1699254202109_375.jpg?',
+    //   options: Options(
+    //     method: 'GET',
+    //   ),
+    // );
+    // Uint8List imageBytes = Uint8List(8);
+
+    // if (response.statusCode == 200) {
+    //   // final Uint8List imageBytes = response.bodyBytes;
+    // } else {
+    //   print(response.statusMessage);
+    // }
+    Uint8List bytes =
+        (await NetworkAssetBundle(Uri.parse(imageUrl)).load(imageUrl))
+            .buffer
+            .asUint8List();
+    await SQLQuery().addNews(
+        title: title,
+        content: content,
+        imageUrl: imageUrl,
+        id: id,
+        image: bytes);
 
     Fluttertoast.showToast(msg: 'Successfully bookmark news');
   }

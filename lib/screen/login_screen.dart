@@ -33,7 +33,6 @@ class _LoginState extends State<Login> {
             child: Container(
           margin: EdgeInsets.all(15),
           child: Form(
-            autovalidateMode: AutovalidateMode.always,
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -62,6 +61,7 @@ class _LoginState extends State<Login> {
                   margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
 
                   child: TextFormField(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     validator: (value) {
                       if (value == null || value.isEmpty)
                         return 'Please enter email/mobile';
@@ -90,6 +90,7 @@ class _LoginState extends State<Login> {
                     // ),
                     child: Obx(
                       () => TextFormField(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
                           if (value == null || value.isEmpty)
                             return 'Please enter password';

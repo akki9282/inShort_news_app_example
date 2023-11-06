@@ -1,6 +1,7 @@
 import 'package:another_transformer_page_view/another_transformer_page_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../controller/news_controller.dart';
@@ -66,32 +67,66 @@ class _BookmarkNewsState extends State<BookmarkNews> {
                                     height: MediaQuery.of(context).size.height *
                                         0.35,
                                     width: double.infinity,
-                                    child: Image.network(errorBuilder:
-                                            (context, error, stackTrace) {
-                                      return Image.asset(
-                                          'assets/course_not_found_icon.png');
-                                    }, loadingBuilder:
-                                            (context, child, loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return Center(
-                                        child: CircularProgressIndicator(
-                                          color: Colors.black,
-                                          value: loadingProgress
-                                                      .expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  loadingProgress
-                                                      .expectedTotalBytes!
-                                              : null,
-                                        ),
-                                      );
-                                    },
-                                        fit: BoxFit.cover,
-                                        (newsController.bookmarkNews?[index]
-                                                    .image_url)
-                                                .toString() ??
-                                            ''),
+                                    child: Image.memory(
+                                      frameBuilder: (context, child, frame,
+                                          wasSynchronouslyLoaded) {
+                                        if (wasSynchronouslyLoaded)
+                                          return child;
+                                        return frame != null
+                                            ? child
+                                            : AnimatedSwitcher(
+                                                duration: const Duration(
+                                                    milliseconds: 200),
+                                                child: SizedBox(
+                                                  height: 50,
+                                                  width: 50,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              );
+
+                                        //   if (wasSynchronouslyLoaded) {
+                                        //     return child;
+                                        //   } else {
+                                        //     return Center(
+                                        //       child: CircularProgressIndicator(
+                                        //         color: Colors.black,
+                                        //       ),
+                                        //     );
+                                        //   }
+                                      },
+                                      fit: BoxFit.cover,
+                                      Uint8List.fromList(newsController
+                                          .bookmarkNews?[index].image),
+                                    ),
+                                    // Image.network(errorBuilder:
+                                    //         (context, error, stackTrace) {
+                                    //   return Image.asset(
+                                    //       'assets/course_not_found_icon.png');
+                                    // }, loadingBuilder:
+                                    //         (context, child, loadingProgress) {
+                                    //   if (loadingProgress == null) return child;
+                                    //   return Center(
+                                    //     child: CircularProgressIndicator(
+                                    //       color: Colors.black,
+                                    //       value: loadingProgress
+                                    //                   .expectedTotalBytes !=
+                                    //               null
+                                    //           ? loadingProgress
+                                    //                   .cumulativeBytesLoaded /
+                                    //               loadingProgress
+                                    //                   .expectedTotalBytes!
+                                    //           : null,
+                                    //     ),
+                                    //   );
+                                    // },
+                                    //     fit: BoxFit.cover,
+                                    //     (newsController.bookmarkNews?[index]
+                                    //                 .image_url)
+                                    //             .toString() ??
+                                    //         ''),
                                   ),
                                   Container(
                                     margin: EdgeInsets.all(15),

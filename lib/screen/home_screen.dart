@@ -406,7 +406,7 @@ class _NewsPageState extends State<NewsPage> {
                                         content: newsController.newsModel?.value
                                                 ?.data?[index].content ??
                                             '',
-                                        image_url: newsController
+                                        imageUrl: newsController
                                                 .newsModel
                                                 ?.value
                                                 ?.data?[index]

@@ -6,4 +6,5 @@ class News extends Table {
   TextColumn get title => text()();
   TextColumn get content => text()();
   TextColumn get image_url => text()();
+  BlobColumn get image => blob()();
 }
